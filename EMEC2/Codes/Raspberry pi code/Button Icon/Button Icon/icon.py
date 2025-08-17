@@ -1,0 +1,71 @@
+import tkinter as tk
+from PIL import Image, ImageTk
+
+class CustomButton(tk.Frame):
+    def __init__(self, parent, icon, command=None):
+        super().__init__(parent)
+        self.command = command
+
+        # Create a button
+        self.button = tk.Button(self, image=icon, command=self.on_button_click, bd=0, highlightthickness=0)
+        self.button.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Create a canvas for the circular indicator
+        self.canvas = tk.Canvas(self, width=20, height=20, bg=self.button.cget('bg'), highlightthickness=0)
+        self.canvas.pack(side=tk.LEFT)
+
+        # Draw a circle on the canvas
+        self.circle = self.canvas.create_oval(5, 5, 15, 15, fill='gray', outline='')
+
+        # Place the canvas at the bottom right corner of the button
+        self.canvas.place(relx=0.9, rely=0.9, anchor=tk.SE)
+
+    def on_button_click(self):
+        if self.command:
+            self.command()
+        self.blink_indicator()
+
+    def blink_indicator(self):
+        # Change the circle color to green
+        self.canvas.itemconfig(self.circle, fill='green')
+        # Change the circle color back to gray after a short delay
+        self.after(500, lambda: self.canvas.itemconfig(self.circle, fill='gray'))
+
+# Function to handle button clicks
+def handle_button_click(button_name):
+    print(f"{button_name} button clicked")
+
+# Create the main window
+root = tk.Tk()
+root.title("Icon-Based GUI")
+
+# Load and resize icons
+icon_size = (64, 64)  # Desired size
+icons = {
+    "start_preview": Image.open("start_preview.png").resize(icon_size),
+    "stop_preview": Image.open("stop_preview.png").resize(icon_size),
+    "start_recording": Image.open("start_recording.png").resize(icon_size),
+    "stop_recording": Image.open("stop_recording.png").resize(icon_size),
+    "take_picture": Image.open("take_picture.png").resize(icon_size),
+    "Spectrometer": Image.open("Spectrometer.png").resize(icon_size)
+}
+
+# Convert icons to PhotoImage objects
+icon_photos = {name: ImageTk.PhotoImage(icon) for name, icon in icons.items()}
+
+# Create custom buttons with icons and circular indicators
+buttons = [
+    ("start_preview", "Start Preview"),
+    ("stop_preview", "Stop Preview"),
+    ("start_recording", "Start Recording"),
+    ("stop_recording", "Stop Recording"),
+    ("take_picture", "Take Picture"),
+    ("Spectrometer", "Spect rometer")
+]
+
+for i, (button_name, text) in enumerate(buttons):
+    custom_button = CustomButton(root, icon_photos[button_name], lambda name=text: handle_button_click(name))
+    custom_button.grid(row=i // 3, column=i % 3, padx=10, pady=10)
+
+# Run the application
+root.mainloop()
